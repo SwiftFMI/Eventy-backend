@@ -2,53 +2,54 @@ import Vapor
 import FluentProvider
 import HTTP
 
-final class Post: Model {
+final class User: Model {
     let storage = Storage()
     
     // MARK: Properties and database keys
+    var username: String
+    var password: String
     
-    /// The content of the post
-    var content: String
     
     /// The column names for `id` and `content` in the database
     struct Keys {
-        static let id = "id"
-        static let content = "content"
+        static let username = "username"
+        static let password = "password"
     }
-
-    /// Creates a new Post
-    init(content: String) {
-        self.content = content
+    
+    init(username: String, password: String) {
+        self.username = username
+        self.password = password
     }
-
     // MARK: Fluent Serialization
-
-    /// Initializes the Post from the
+    /// Initializes the User from the
     /// database row
     init(row: Row) throws {
-        content = try row.get(Post.Keys.content)
+        username = try row.get(User.Keys.username)
+        password = try row.get(User.Keys.password)
     }
-
-    // Serializes the Post to the database
+    
+    // Serializes the User to the database
     func makeRow() throws -> Row {
         var row = Row()
-        try row.set(Post.Keys.content, content)
+        try row.set(User.Keys.username, username)
+        try row.set(User.Keys.password, password)
         return row
     }
 }
 
 // MARK: Fluent Preparation
 
-extension Post: Preparation {
+extension User: Preparation {
     /// Prepares a table/collection in the database
-    /// for storing Posts
+    /// for storing Users
     static func prepare(_ database: Database) throws {
         try database.create(self) { builder in
             builder.id()
-            builder.string(Post.Keys.content)
+            builder.string(User.Keys.username)
+            builder.string(User.Keys.password)
         }
     }
-
+    
     /// Undoes what was done in `prepare`
     static func revert(_ database: Database) throws {
         try database.delete(self)
@@ -56,47 +57,43 @@ extension Post: Preparation {
 }
 
 // MARK: JSON
-
-// How the model converts from / to JSON.
-// For example when:
-//     - Creating a new Post (POST /posts)
-//     - Fetching a post (GET /posts, GET /posts/:id)
-//
-extension Post: JSONConvertible {
+extension User: JSONConvertible {
     convenience init(json: JSON) throws {
         self.init(
-            content: try json.get(Post.Keys.content)
+            username: try json.get(User.Keys.username),
+            password: try json.get(User.Keys.password)
         )
     }
     
     func makeJSON() throws -> JSON {
         var json = JSON()
-        try json.set(Post.Keys.id, id)
-        try json.set(Post.Keys.content, content)
+        try json.set(User.Keys.username, username)
+        try json.set(User.Keys.password, password)
         return json
     }
 }
 
 // MARK: HTTP
 
-// This allows Post models to be returned
+// This allows User models to be returned
 // directly in route closures
-extension Post: ResponseRepresentable { }
+extension User: ResponseRepresentable { }
 
 // MARK: Update
 
-// This allows the Post model to be updated
+// This allows the User model to be updated
 // dynamically by the request.
-extension Post: Updateable {
+extension User: Updateable {
     // Updateable keys are called when `post.update(for: req)` is called.
     // Add as many updateable keys as you like here.
-    public static var updateableKeys: [UpdateableKey<Post>] {
+    public static var updateableKeys: [UpdateableKey<User>] {
         return [
             // If the request contains a String at key "content"
             // the setter callback will be called.
-            UpdateableKey(Post.Keys.content, String.self) { post, content in
-                post.content = content
+            UpdateableKey(User.Keys.password, String.self) { user, content in
+                user.password = content
             }
         ]
     }
 }
+
