@@ -12,9 +12,10 @@ let package = Package(
         .package(url: "https://github.com/vapor/vapor.git", .upToNextMajor(from: "2.1.0")),
         .package(url: "https://github.com/vapor/fluent-provider.git", .upToNextMajor(from: "1.2.0")),
         .package(url: "https://github.com/vapor-community/postgresql-provider.git", .exact("2.1.0")),
+		.package(url: "https://github.com/heitara/VaporGenerators.git", .exact("0.1.6")),
         ],
     targets: [
-        .target(name: "App", dependencies: ["Vapor", "FluentProvider", "PostgreSQLProvider"],
+        .target(name: "App", dependencies: ["Vapor", "FluentProvider", "PostgreSQLProvider", "VaporGenerators"],
                 exclude: [
                     "Config",
                     "Public",

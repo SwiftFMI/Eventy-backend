@@ -1,5 +1,5 @@
 import App
-
+import VaporGenerators
 /// We have isolated all of our App's logic into
 /// the App module because it makes our app
 /// more testable.
@@ -16,10 +16,14 @@ import App
 ///
 /// .run() runs the Droplet's commands, 
 /// if no command is given, it will default to "serve"
+
 let config = try Config()
 try config.setup()
 
+config.addConfigurable(command: Generate.init, name: "generate")
+
 let drop = try Droplet(config)
 try drop.setup()
+//drop.commands.append()
 
 try drop.run()
