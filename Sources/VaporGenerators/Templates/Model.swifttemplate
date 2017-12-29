@@ -36,7 +36,7 @@ final class _CLASS_NAME_: Model {
         _FLUENT_INITIALIZER_
     }
 
-    // Serializes the User to the database
+    // Serializes the _CLASS_NAME_ to the database
     func makeRow() throws -> Row {
         var row = Row()
         _FLUENT_SERIALIZE_

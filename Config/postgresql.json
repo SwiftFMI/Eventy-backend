@@ -1,0 +1,7 @@
+{
+    "hostname": "127.0.0.1",
+    "user": "eventy_admin",
+    "password": "",
+    "database": "eventy",
+    "port": 5432
+}

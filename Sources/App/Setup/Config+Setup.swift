@@ -21,6 +21,10 @@ extension Config {
     /// schemas prepared before the app boots
     private func setupPreparations() throws {
         preparations.append(User.self)
-//        preparations.append(Event.self)
+        preparations.append(Event.self)
+        preparations.append(Asset.self)
+        preparations.append(Location.self)
+        preparations.append(Pivot<Event, Asset>.self)
+        preparations.append(Pivot<Event, User>.self)
     }
 }

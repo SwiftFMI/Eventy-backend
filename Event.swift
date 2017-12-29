@@ -1,53 +1,56 @@
 import Vapor
 import FluentProvider
 import HTTP
-import AuthProvider
 
-final class User: Model {
+final class Event: Model {
     let storage = Storage()
     
     // MARK: Properties and database keys
-    var username: String
-    var password: String
-    
-    
-    /// The column names for `id` and `content` in the database
+    var creatorId: Identifier?
+    var title: String
+    var description: String?
+    var startDate: Date?
+    var endDate: Date?
+    var location: Identifier?
+	
+   
     struct Keys {
-        static let username = "username"
-        static let password = "password"
+        static let creatorId = "creatorId"
+        static let title = "title"
+        static let description = "description"
+        static let startDate = "startDate"
+        static let endDate = "endDate"
+		static let locationId = "locationId"
     }
     
-    init(username: String, password: String) {
-        self.username = username
-        self.password = password
+    init(title: String, description: String?, startDate:Date?, endDate:Date?) {
+        self.title = title
+        self.description = description
     }
     // MARK: Fluent Serialization
     /// Initializes the User from the
     /// database row
     init(row: Row) throws {
         username = try row.get(User.Keys.username)
-        password = try row.get(User.Keys.password)
+        password = try row.get(Event.Keys.password)
     }
     
-    // Serializes the User to the database
     func makeRow() throws -> Row {
         var row = Row()
-        try row.set(User.Keys.username, username)
-        try row.set(User.Keys.password, password)
+        try row.set(Event.Keys.username, username)
+        try row.set(Event.Keys.password, password)
         return row
     }
 }
 
 // MARK: Fluent Preparation
 
-extension User: Preparation {
-    /// Prepares a table/collection in the database
-    /// for storing Users
+extension Event: Preparation {
     static func prepare(_ database: Database) throws {
         try database.create(self) { builder in
             builder.id()
-            builder.string(User.Keys.username)
-            builder.string(User.Keys.password)
+            builder.string(Event.Keys.username)
+            builder.string(Event.Keys.password)
         }
     }
     
@@ -58,7 +61,7 @@ extension User: Preparation {
 }
 
 // MARK: JSON
-extension User: JSONConvertible {
+extension Event: JSONConvertible {
     convenience init(json: JSON) throws {
         self.init(
             username: try json.get(User.Keys.username),
@@ -98,21 +101,3 @@ extension User: Updateable {
     }
 }
 
-
-//MARK : Authentication
-extension User: PasswordAuthenticatable {
-    public var hashedPassword: String? {
-        return password
-    }
-    public static var passwordVerifier: PasswordVerifier? {
-        return SimplePasswordVerifier()
-    }
-}
-
-extension User: SessionPersistable {}
-
-struct SimplePasswordVerifier: PasswordVerifier {
-    func verify(password: Bytes, matches hash: Bytes) throws -> Bool {
-        return try BCryptHasher().verify(password: password, matches: hash)
-    }
-}
