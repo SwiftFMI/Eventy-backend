@@ -24,24 +24,14 @@ extension Droplet {
         
         //TODO:
         
-        let userController = UserController()
-        userController.addRoutes(to:self)
-        
         let persistMW = PersistMiddleware(User.self)
         let memory = MemorySessions()
         let sessionMW = SessionsMiddleware(memory)
-        let loginRoute = grouped([sessionMW, persistMW])
-        
-        loginRoute.post("login", handler: userController.login)
-        loginRoute.get("logout", handler: userController.logout)
-        
         let passwordMW = PasswordAuthenticationMiddleware(User.self)
-        let authRoute = grouped([sessionMW, persistMW, passwordMW])
-        authRoute.get("profile", handler: userController.profile)
         
-        //user/register - POST
-        //user/login - POST
-        
+        let userController = UserController()
+        userController.addRoutes(to:self, middleware: [.session: sessionMW, .persist: persistMW, .password: passwordMW])
+
         //events - GET (key & uid)
         //event/:id - GET - event details
         
@@ -55,13 +45,5 @@ extension Droplet {
         
         //TBD
         //asset/:id - GET (comments)
-        
-        
-        
-        
-        
-        
-        
-        
     }
 }

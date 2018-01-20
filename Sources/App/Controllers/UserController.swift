@@ -3,15 +3,25 @@ import FluentProvider
 import AuthProvider
 
 struct UserController {
-    func addRoutes(to drop: Droplet) {
+    enum MiddlewareType {
+        case session, persist, password
+    }
+
+    func addRoutes(to drop: Droplet, middleware: [MiddlewareType: Middleware]) {
         let userGroup = drop.grouped("user")
         //user/register - POST
         //user/login - POST
         //user/profile - POST, GET
-        //user/forgot - POST - TBD
         userGroup.post("register", handler: createUser)
         userGroup.post("profile", handler: createUser)
         userGroup.get(User.parameter, handler: getUser)
+        
+        let sessionRoute = userGroup.grouped([middleware[.session]!, middleware[.persist]!])
+        sessionRoute.post("login", handler: login)
+        sessionRoute.get("logout", handler: logout)
+
+        let authRoute = sessionRoute.grouped(middleware[.password]!)
+        authRoute.get("profile", handler: profile)
     }
 
     func createUser(_ req: Request) throws -> ResponseRepresentable {
@@ -27,7 +37,7 @@ struct UserController {
         }
         
         guard
-            try User.makeQuery().filter("email", email).first() == nil
+            try User.makeQuery().filter("username", email).first() == nil
             else {
                 throw Abort.badRequest
         }

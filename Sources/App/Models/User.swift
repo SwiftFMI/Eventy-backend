@@ -107,6 +107,10 @@ extension User: PasswordAuthenticatable {
     public static var passwordVerifier: PasswordVerifier? {
         return SimplePasswordVerifier()
     }
+    
+    public static var usernameKey: String {
+        return "username"
+    }
 }
 
 extension User: SessionPersistable {}
