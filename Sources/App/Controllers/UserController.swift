@@ -2,18 +2,17 @@ import Vapor
 import FluentProvider
 import AuthProvider
 
-struct UserController {
-    enum MiddlewareType {
-        case session, persist, password
-    }
+enum MiddlewareType {
+    case session, persist, password
+}
 
+struct UserController {
     func addRoutes(to drop: Droplet, middleware: [MiddlewareType: Middleware]) {
         let userGroup = drop.grouped("user")
         //user/register - POST
         //user/login - POST
         //user/profile - POST, GET
         userGroup.post("register", handler: createUser)
-        userGroup.post("profile", handler: createUser)
         userGroup.get(User.parameter, handler: getUser)
         
         let sessionRoute = userGroup.grouped([middleware[.session]!, middleware[.persist]!])
@@ -22,6 +21,7 @@ struct UserController {
 
         let authRoute = sessionRoute.grouped(middleware[.password]!)
         authRoute.get("profile", handler: profile)
+        authRoute.post("profile", handler: updateProfile)
     }
 
     func createUser(_ req: Request) throws -> ResponseRepresentable {
@@ -85,6 +85,12 @@ struct UserController {
     }
     
     func profile(_ req: Request) throws -> ResponseRepresentable {
+        // returns user from session
+        let user: User = try req.auth.assertAuthenticated()
+        return user
+    }
+    
+    func updateProfile(_ req: Request) throws -> ResponseRepresentable {
         // returns user from session
         let user: User = try req.auth.assertAuthenticated()
         return user

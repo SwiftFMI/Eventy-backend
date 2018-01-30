@@ -31,6 +31,9 @@ extension Droplet {
         
         let userController = UserController()
         userController.addRoutes(to:self, middleware: [.session: sessionMW, .persist: persistMW, .password: passwordMW])
+        
+        let eventController = EventController()
+        eventController.addRoutes(to:self, middleware: [.session: sessionMW, .persist: persistMW])
 
         //events - GET (key & uid)
         //event/:id - GET - event details

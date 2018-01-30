@@ -14,6 +14,7 @@ final class Event: Model {
     var startDate: Date
     var endDate: Date
     var locationId: Location
+    var isPrivate: Bool
     
     struct Keys {
         static let creatorId = "creator_id"
@@ -22,15 +23,17 @@ final class Event: Model {
         static let startDate = "start_date"
         static let endDate = "end_date"
         static let locationId = "location_id"
+        static let isPrivate = "private"
     }
 
-    init(creatorId:User, title:String, description:String, startDate:Date, endDate:Date, locationId:Location) {
+    init(creatorId:User, title:String, description:String, startDate:Date, endDate:Date, locationId:Location, isPrivate:Bool) {
         self.creatorId = creatorId
         self.title = title
         self.description = description
         self.startDate = startDate
         self.endDate = endDate
         self.locationId = locationId
+        self.isPrivate = isPrivate
     }
     // MARK: Fluent Serialization
     /// Initializes the Event from the
@@ -42,6 +45,7 @@ final class Event: Model {
         startDate = try row.get(Event.Keys.startDate)
         endDate = try row.get(Event.Keys.endDate)
         locationId = try row.get(Event.Keys.locationId)
+        isPrivate = try row.get(Event.Keys.isPrivate)
     }
 
     // Serializes the User to the database
@@ -53,6 +57,7 @@ final class Event: Model {
         try row.set(Event.Keys.startDate, startDate)
         try row.set(Event.Keys.endDate, endDate)
         try row.set(Event.Keys.locationId, locationId)
+        try row.set(Event.Keys.isPrivate, isPrivate)
         return row
     }
     
@@ -62,12 +67,13 @@ extension Event: Preparation {
     static func prepare(_ database: Database) throws {
         try database.create(self) {
             $0.id()
-            $0.int("creator_id")
-            $0.string("title")
-            $0.string("description")
-            $0.date("start_date")
-            $0.date("end_date")
-            $0.int("location_id")
+            $0.int(Event.Keys.creatorId)
+            $0.string(Event.Keys.title)
+            $0.string(Event.Keys.description)
+            $0.date(Event.Keys.startDate)
+            $0.date(Event.Keys.endDate)
+            $0.int(Event.Keys.locationId)
+            $0.bool(Event.Keys.isPrivate)
         }
     }
     
@@ -85,7 +91,8 @@ extension Event: JSONConvertible {
             description: try json.get(Event.Keys.description),
             startDate: try json.get(Event.Keys.startDate),
             endDate: try json.get(Event.Keys.endDate),
-            locationId: try json.get(Event.Keys.locationId)
+            locationId: try json.get(Event.Keys.locationId),
+            isPrivate: try json.get(Event.Keys.isPrivate)
         )
     }
     
@@ -97,6 +104,7 @@ extension Event: JSONConvertible {
         try json.set(Event.Keys.startDate, startDate)
         try json.set(Event.Keys.endDate, endDate)
         try json.set(Event.Keys.locationId, locationId)
+        try json.set(Event.Keys.isPrivate, isPrivate)
         return json
     }
 }
