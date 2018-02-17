@@ -7,6 +7,12 @@ enum MiddlewareType {
 }
 
 struct UserController {
+    let fileStorage:FileStorage
+    
+    init(storage:FileStorage) {
+        self.fileStorage = storage
+    }
+    
     func addRoutes(to drop: Droplet, middleware: [MiddlewareType: Middleware]) {
         let userGroup = drop.grouped("user")
         //user/register - POST

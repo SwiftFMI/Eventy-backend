@@ -8,12 +8,12 @@ final class Event: Model {
     fileprivate static let tableName = "Events"
     
     var id: Node?
-    var creatorId: User
+    var creator: Identifier?
     var title: String
     var description: String
     var startDate: Date
     var endDate: Date
-    var locationId: Location
+    var location: Identifier?
     var isPrivate: Bool
     
     struct Keys {
@@ -24,39 +24,41 @@ final class Event: Model {
         static let endDate = "end_date"
         static let locationId = "location_id"
         static let isPrivate = "private"
+        
+        static let assets = "assets"
     }
 
-    init(creatorId:User, title:String, description:String, startDate:Date, endDate:Date, locationId:Location, isPrivate:Bool) {
-        self.creatorId = creatorId
+    init(creator:User, title:String, description:String, startDate:Date, endDate:Date, location:Location, isPrivate:Bool) {
+        self.creator = creator.id
         self.title = title
         self.description = description
         self.startDate = startDate
         self.endDate = endDate
-        self.locationId = locationId
+        self.location = location.id
         self.isPrivate = isPrivate
     }
     // MARK: Fluent Serialization
     /// Initializes the Event from the
     /// database row
     init(row: Row) throws {
-        creatorId = try row.get(Event.Keys.creatorId)
+        creator = try row.get(Event.Keys.creatorId)
         title = try row.get(Event.Keys.title)
         description = try row.get(Event.Keys.description)
         startDate = try row.get(Event.Keys.startDate)
         endDate = try row.get(Event.Keys.endDate)
-        locationId = try row.get(Event.Keys.locationId)
+        location = try row.get(Event.Keys.locationId)
         isPrivate = try row.get(Event.Keys.isPrivate)
     }
 
     // Serializes the User to the database
     func makeRow() throws -> Row {
         var row = Row()
-        try row.set(Event.Keys.creatorId, creatorId)
+        try row.set(Event.Keys.creatorId, creator)
         try row.set(Event.Keys.title, title)
         try row.set(Event.Keys.description, description)
         try row.set(Event.Keys.startDate, startDate)
         try row.set(Event.Keys.endDate, endDate)
-        try row.set(Event.Keys.locationId, locationId)
+        try row.set(Event.Keys.locationId, location)
         try row.set(Event.Keys.isPrivate, isPrivate)
         return row
     }
@@ -67,6 +69,7 @@ extension Event: Preparation {
     static func prepare(_ database: Database) throws {
         try database.create(self) {
             $0.id()
+            $0.foreignId(for: User.self, optional: true, unique: false, foreignIdKey: Event.Keys.creatorId, foreignKeyName: Event.Keys.creatorId)
             $0.int(Event.Keys.creatorId)
             $0.string(Event.Keys.title)
             $0.string(Event.Keys.description)
@@ -86,25 +89,32 @@ extension Event: Preparation {
 extension Event: JSONConvertible {
     convenience init(json: JSON) throws {
         self.init(
-            creatorId: try json.get(Event.Keys.creatorId),
+            creator: try json.get(Event.Keys.creatorId),
             title: try json.get(Event.Keys.title),
             description: try json.get(Event.Keys.description),
             startDate: try json.get(Event.Keys.startDate),
             endDate: try json.get(Event.Keys.endDate),
-            locationId: try json.get(Event.Keys.locationId),
+            location: try json.get(Event.Keys.locationId),
             isPrivate: try json.get(Event.Keys.isPrivate)
         )
     }
     
     func makeJSON() throws -> JSON {
         var json = JSON()
-        try json.set(Event.Keys.creatorId, creatorId)
+        try json.set(Event.Keys.creatorId, creator)
         try json.set(Event.Keys.title, title)
         try json.set(Event.Keys.description, description)
         try json.set(Event.Keys.startDate, startDate)
         try json.set(Event.Keys.endDate, endDate)
-        try json.set(Event.Keys.locationId, locationId)
+        try json.set(Event.Keys.locationId, location)
         try json.set(Event.Keys.isPrivate, isPrivate)
+        
+        let assets = try self.assets.all()
+        try json.set(Event.Keys.assets, assets)
+        
+        
+        
+        
         return json
     }
 }

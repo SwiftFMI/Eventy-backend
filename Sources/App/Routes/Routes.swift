@@ -28,11 +28,12 @@ extension Droplet {
         let memory = MemorySessions()
         let sessionMW = SessionsMiddleware(memory)
         let passwordMW = PasswordAuthenticationMiddleware(User.self)
+        let storage = FileStorage(to:self)
         
-        let userController = UserController()
+        let userController = UserController(storage:storage)
         userController.addRoutes(to:self, middleware: [.session: sessionMW, .persist: persistMW, .password: passwordMW])
         
-        let eventController = EventController()
+        let eventController = EventController(storage:storage)
         eventController.addRoutes(to:self, middleware: [.session: sessionMW, .persist: persistMW])
 
         //events - GET (key & uid)
